@@ -14,12 +14,7 @@ import networkx as nx
 import collections
 
 # Generate a system
-s1 = sy.System(n=100,obj="sphere",p=0.5)
-dc, perf_sum = s1.run()
-
-# Plot the results
-plt.semilogy(perf_sum)
-plt.show()
+s1 = sy.System()
 
 # Plot the system
 options = {

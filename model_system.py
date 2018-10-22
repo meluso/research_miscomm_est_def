@@ -14,17 +14,18 @@ history of each agent in the network, and the process of designing the system.
 from networkx.generators.random_graphs import powerlaw_cluster_graph as gen
 import numpy as np
 import model_agent as ag
+import pyDOE as doe
 
 class System(object):
     '''Defines a class system which contains a specified number of agents that
     are engineers designing various components. Also includes methods for
     advancing the system from an initial to a final converged design.'''
 
-    def __init__(self, n = 1000, m = 2, p = 0.5):
+    def __init__(self, m = 2, n = 1000, obj = "sphere", p = 0.5):
         '''Initializes an instance of the system model.'''
         
         ##### Agent Properties #####
-        self.obj_fn = "sphere"  # The objective function used by the agents
+        self.obj_fn = obj  # The objective function used by the agents
         
         ##### Network Properties #####
         
@@ -37,10 +38,37 @@ class System(object):
         
         ##### System Properties #####
         
-            # Get initial system design vector from agents
-            # Initialize final system design vector variable
-            # Define system convergence limit
-            # Generate system histories using generate_history
+        self.s = 101  # The number of hypercube sampling partitions
+        self.conv_lim = 1  # System convergence limit
+        
+        # Vector (old and new) of the agents' returned values
+        self.vect = [ag.Obj_Eval() for i in range(n)]
+        self.vect_new = [ag.Obj_Eval() for i in range(n)]
+        
+        # Generate the system history        
+        self.generate_history()
+        
+        for i in range(len(self.system)):
+            
+            # Initialize the agent's estimate
+            self.system[i].initialize_estimates()
+        
+            # Return the estimates to the system
+            self.vect_new[i] = self.system[i].get_estimate()
+        
+        # Create a vector of just estimates for evaluation initialization
+        est_vect = [self.vect_new[i].x for i in range(self.n)]
+        
+        for i in range(len(self.system)):
+            
+            # Populate the initial function evaluations of the agents
+            self.system[i].initialize_evaluations(est_vect)
+            
+            # Return the estimates to the system
+            self.vect_new[i] = self.system[i].get_estimate()
+            
+        # Transfer new values to system as current system design
+        self.vect = self.vect_new
 
     
     def __repr__(self):
@@ -70,43 +98,96 @@ class System(object):
             
         # Return the generated network of agents
         return system
-    
-    
-    def run(self):
-        '''Designs the system. Assumes the system has already been initialized
-        with histories for each agent.'''
-        
-        # While system design has not converged and
-        # the system has not reached max number of design cycles
-            # Perform a design cycle by calling design_cycle
-            # Increment design cycle counter
 
-    
+
     def generate_history(self):
         '''Creates a historical profile for all of the agents through Latin
         Hypercube sampling all of the agents a specified number of times.'''
         
-        # Generate specified number of random sampling combination vectors which
-            # determine where in the design domain of each agent the decision
-            # variable for each agent will be drawn from. For example,
-            # partition each of 3 agents' design spaces into 5 values. Then
-            # vectors [2,5,3], [3,4,1], [5,2,4], [1,3,2], and [4,1,5] form an
-            # unbiased sample of the design space.
+        # Generate a latin hypercube sampling for the agents
+        samples = 101  # Set number of samples to take
         
-        # For each sampling combination
-            # For each agent
-                # Feed the agent the system design vector
-                # Ask agent to store its input value and objective evaluation
-                
-        # For each agent
-            # Set each agent's history profile
+        # Create the hypercube sample
+        self.hypercube = doe.lhs(self.n,samples)
+        
+        # Scale the hypercube samples to the agents' bounds
+        for i in range(len(self.system)):
+            
+            # Get bounds from agent
+            min_val = self.system[i].obj_bounds.xmin
+            max_val = self.system[i].obj_bounds.xmax
+            
+            # Scale all of the agents' samples to that range
+            for h in range(samples):
+                self.hypercube[h][i] = min_val + (max_val - min_val)* \
+                                       self.hypercube[h][i]
+        
+        # Cycle through all of the hypercube sample vectors
+        for h in range(samples):
+            
+            # Give the agents initial points to run one optimization on
+            for i in range(len(self.system)):
+                self.vect_new[i] = \
+                    self.system[i].rand_hist_init(self.hypercube[h])
+            
+            # Give agents the optimized vector to evaluate and save
+            for a in self.system:
+                a.save_history(self.vect_new)
     
     
     def design_cycle(self):
         '''Perform a single design cycle with all of the agents.'''
         
         # For each agent
-            # Give agent initial system design vector    
-            # Perform one design cycle
-            # Record final system design value returned by agent
+        for i in range(len(self.system)):
+            
+            # Perform one design cycle with current system vector
+            self.vect_new[i] = self.system[i].generate_estimate(self.vect)
+            
+        # Record all system design values returned by agents
+        self.vect = self.vect_new
+            
+    
+    def run(self):
+        '''Designs the system. Assumes the system has already been initialized
+        with histories for each agent.'''
+        
+        # Initialize design cycle counter and convergence flag
+        dc = 0
+        cv = 0
+        
+        # Create performance vector and sum
+        perf_vect = [self.vect[i].fx for i in range(self.n)]
+        perf_sum = []
+        perf_sum.append(sum(perf_vect))
+        
+        # Perform design cycles until converged
+        while dc < 100 and cv == 0:
+            
+            # Increment design cycle counter
+            dc = dc + 1
+            
+            # Perform a design cycle by calling design_cycle
+            self.design_cycle()
+            
+            # Evaluate the system's performance
+            perf_vect = [self.vect[i].fx for i in range(self.n)]
+            perf_sum.append(sum(perf_vect))
+            
+            # Check convergence conditions
+            if dc > 3:
+                
+                # Check current evaluation against current-3
+                if abs(perf_sum[dc] - perf_sum[dc - 3]) < self.conv_lim:
+                    cv == 1 # Set the convergence flag to terminate
+                
+            else:
+                
+                # Check current evaluation against the original evaluation
+                if abs(perf_sum[dc] - perf_sum[0]) < self.conv_lim:
+                    cv == 1 # Set the convergence flag to terminate
+            
+        return dc, perf_sum
+    
+
             

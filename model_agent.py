@@ -35,14 +35,14 @@ Parameters:
 Change Log:
 
 Date:       Author:    Description:
-2018-10-10  jmeluso    Initial version.
+2018-10-10  jmeluso    Initial version started.
 -------------------------------------------------------------------------------
 """
 
 # Import python packages
 import numpy as np
-from numpy import exp, cos, pi, sqrt, vdot
-from scipy.optimize import basinhopping as min_fn
+from numpy import exp, cos, pi, sqrt, dot
+import scipy.optimize as opt
 
 
 class Agent(object):
@@ -88,55 +88,100 @@ class Agent(object):
     def __repr__(self):
         '''Returns a representation of the agent'''
         return self.__class__.__name__
-    
-    
-    def set_system_locations(self,location,neighbors):
-        '''Takes a location and vector of neighbors from the system and uses
-        those values to populate the agent's own fields.'''
         
-        # Set the agent's location and specify its neighbors
-        self.location = location
-        self.neighbors = neighbors
+    
+    def rand_hist_init(self,lhs_vect):
+        '''Takes in a latin hypercube vector initialization to run a single
+        design cycle. It then feeds this result back to the system without
+        saving. This method is coupled with save history.'''
+        
+        xi = lhs_vect[self.location]
+        
+        # Initialize a vector of neighbors' values from Latin Hypercube Sample
+        # vector (not an object Ojb_Eval)
+        xj = [lhs_vect[j] for j in self.neighbors]
+
+        # Optimize from the given inputs for one iteration
+        result = self.optimize(xi,xj)
+        
+        # Return just the x from the optimized result
+        return result
+    
+    
+    def save_history(self,sys_vect):
+        '''Saves a historical point by receiving corresponding optimized values
+        from the other agents as it optimized its own variable. It then uses
+        the objective function to evaluate the system vector. The x and f(x)
+        of this evaluation are the saved historical point.'''
+        
+        xi = sys_vect[self.location].x
+        
+        # Initialize a vector of neighbors' values from the system vector
+        # (which is an object Ojb_Eval)
+        xj = [sys_vect[j].x for j in self.neighbors]
+        
+        # Evaluate the given inputs
+        result = self.objective(xi,xj)
+        
+        # Save x and f(x) as an objective evaluation to the history list
+        self.history.append(Obj_Eval(xi,result))
+        
         
     def initialize_estimates(self):
         '''Uses the history generated so far to set the historical median and
         generates a random value for the initial current estimate.'''
         
         # Find the median historical value
-        inputs = []
-        outputs = []
-        for h in self.history:
-            inputs.append(h.x)
-            outputs.append(h.fx)
+        self.hist_in = [h.x for h in self.history]
+        self.hist_out = [h.fx for h in self.history]
         
-        median_index = np.argsort(outputs)[len(outputs)//2]
-        self.hist_med.set_eval(inputs[median_index], outputs[median_index])
+        # Initialize the agent's future estimate by using the historical
+        # median's value.
+        self.median_index = np.argsort(self.hist_out)[len(self.hist_out)//2]
+        self.hist_med.x = self.hist_in[self.median_index]
         
         # Initialize the agent's current estimate by randomly generating an
         # a value on the domain of the objective function inputs
         # (-bound,+bound)
         self.curr_est.x = ((self.obj_bounds.xmax - self.obj_bounds.xmin)* \
                            np.random.random_sample() + self.obj_bounds.xmin)
-
-
-    def generate_history(self,sys_vect):
-        '''Uses a system vector only to generate one historical value for the
-        agent. The agent evaluates the inputs using its objective function.
-        Then, the agent compiles the generated decision variable value and
-        objective evaluation.'''
         
-        xi = sys_vect[self.location]
-        xj = []  # Initialize a vector of neighbors' values
+        
+    def initialize_evaluations(self,sys_vect):
+        '''Once all of the agents have been populated with their histories,
+        they come up with an initial estiamte which they feed back to the
+        system. Then, (as in this method) the system feeds the system vector
+        back to the agents to populate the objective evaluations. Both the
+        hist_med and curr_est function evaluations are performed here.'''
+        
+        # Get the historical median's objective evaluation
+        self.hist_med.fx = self.hist_out[self.median_index]
+        
+        # Get own value for initial evaluation
+        xi = self.curr_est.x
+        
+        # Initialize a vector of neighbors' values
+        xj = [sys_vect[j] for j in self.neighbors]
+        
+        # Calculate the current estimate's objective evaluation
+        self.curr_est.fx = self.objective(xi,xj)
 
-        # Extract neighbors' values from system vector
-        for j in self.neighbors:
-            xj.append(sys_vect[j])
 
-        # Create a new evaluation from inputs
-        result = self.objective(xi,xj)
-
-        # Save x and f(x) as an objective evaluation to the history list
-        self.history.append(Obj_Eval(xi,result))
+    def get_estimate(self):
+        '''Returns the appropriate estimate according to the type of estimate
+        the agent is designated to return.'''
+        
+        # Return an estimate ("current" or "future")
+        if self.est_type == "current":
+            return self.curr_est  # Return current value to system
+        else:  # self.est_type == "future"
+            # Return the lesser of the historical median and current value
+            if self.curr_est.fx < self.hist_med.fx:
+                # The current estimate is better, so return it
+                return self.curr_est
+            else:
+                # Return historical median to system
+                return self.hist_med
 
 
     def generate_estimate(self,sys_vect):
@@ -147,47 +192,52 @@ class Agent(object):
         or future) of the estimate to return.'''
         
         xi = self.curr_est.x
-        xj = []  # Initialize a vector of neighbors' values
         
-        # Extract neighbors' values from system vector
-        for j in self.neighbors:
-            xj.append(sys_vect[j])
+        # Initialize a vector of neighbors' values
+        xj = [sys_vect[j].x for j in self.neighbors]
 
         # Create a new estimate by optimizing with inputs and own values
         estimate = self.optimize(xi,xj)
 
         # Save results
-        self.curr_est.x = estimate.x[0]
-        self.curr_est.fx = estimate.fun
-
-        # Return an estimate ("current" or "future")
-        if self.est_type == "current":
-            return self.curr_est.x  # Return current value to system
-        else:  # self.est_type == "future"
-            # Return the lesser of the historical median and current value
-            if self.curr_est.fx < self.hist_med.fx:
-                # The current estimate is better, so return it
-                return self.curr_est.x
-            else:
-                # Return historical median to system
-                return self.hist_med.x
+        self.curr_est.x = estimate.x
+        self.curr_est.fx = estimate.fx
+        
+        # Return the estimate
+        return self.get_estimate()
 
 
     def optimize(self,xi,xj):
         '''Optimizes the agent's design using the objective function and inputs
-        from neighbor agents. Minimize is the scipy.optimize.basinhopping
-        method which supercedes the simulated annealing algorithm in python.
-        The function takes in the agent's own value (xi) and the neighbors
-        vector (xj).'''
+        from neighbor agents. The function takes in the agent's own value (xi)
+        and the neighbors vector (xj). It selects the appropriate optimization
+        algorithm for the function.'''
+        
+        # Use basinhopping only for multiple-minimum functions
+        if self.fn == "ackley":
 
-        # Call the minimization method
-        result =  min_fn(func = self.objective,
-                         x0 = xi,
-                         niter = 1,
-                         stepsize = (self.obj_bounds.xmax \
-                                     - self.obj_bounds.xmin)/10,
-                         minimizer_kwargs = {"args": xj,"method": "BFGS"},
-                         accept_test = self.obj_bounds)
+            # Call the basin hopping minimization method
+            output = opt.basinhopping(func = self.objective,
+                             x0 = xi,
+                             stepsize = (self.obj_bounds.xmax \
+                                         - self.obj_bounds.xmin)/10,
+                             minimizer_kwargs = {"args": xj,"method": "BFGS"},
+                             accept_test = self.obj_bounds)
+            
+            # Save the desired outputs
+            result = Obj_Eval(output.x[0],output.fun)
+            
+        else:  # Use gradient for single- or few-minimum functions
+            
+            # Call the bounded brent scalar minimization function
+            output = opt.minimize_scalar(fun = self.objective,
+                             bounds = (self.obj_bounds.xmin,\
+                                       self.obj_bounds.xmax),
+                             args = (xj),
+                             method = 'bounded')
+            
+            # Save the desired outputs
+            result = Obj_Eval(output.x,output.fun)
         
         # Return the result
         return result
@@ -216,7 +266,7 @@ class Agent(object):
                 cos_sum = cos_sum + cos(c*j)
 
             # Evaluate the ackley function
-            root_term = -a*exp(-b*sqrt((xi**2 + vdot(xj,xj))/(k + 1)))
+            root_term = -a*exp(-b*sqrt((xi**2 + dot(xj,xj))/(k + 1)))
             cos_term = -exp((cos(c*xi) + cos_sum)/(k + 1))
 
             # Return the function evaluation
@@ -239,16 +289,13 @@ class Agent(object):
             vect = xj
             vect.insert(0,xi)
             
-            # Build double sum
-            result = 0
-            for i in range(1,len(vect)-1):
-                result = result + (100*(vect[i+1]-vect[i]**2)**2
-                                   + (vect[i]-1)**2)
+            # Call scipy function for rosenbrock
+            result = opt.rosen(vect)
 
         else:
 
             # Evaluate the sphere function
-            result = xi**2 + vdot(xj,xj)
+            result = xi**2 + dot(xj,xj)
 
         # Return the outcome
         return result
@@ -276,15 +323,6 @@ class Obj_Eval(object):
         '''Gets the values stored in the function eval class.'''
         
         return [self.x,self.fx]  # Return the objective evaluation pair
-    
-    
-    def set_eval(self,x=[],fx=[]):
-        '''Updates the values saved in the function evaluation object.'''
-        
-        if x != []: # If the update value isn't empty
-            self.x = x  # Update x
-        if fx != []: # If the update value isn't empty
-            self.fx = fx  # Update fx
 
         
 class Bounds(object):
@@ -303,19 +341,3 @@ class Bounds(object):
         tmin = bool(np.all(x >= self.xmin))
         tmax = bool(np.all(x <= self.xmax))
         return tmin and tmax
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
