@@ -14,12 +14,8 @@ import networkx as nx
 import collections
 
 # Generate a system
-s1 = sy.System(n=100,obj="sphere",p=0.5)
-dc, perf_sum = s1.run()
+s1 = sy.System(100,"styblinski-tang",0.5,"best_est")
 
-# Plot the results
-plt.semilogy(perf_sum)
-plt.show()
 
 # Plot the system
 options = {
@@ -27,7 +23,8 @@ options = {
         'node_size': 5,
         'width': 1
         }
-nx.draw(s1.graph, **options)
+#nx.draw(s1.graph, **options)
+nx.draw_kamada_kawai(s1.graph, **options)
 plt.show()
 
 # Graph the degree distribution of the system
@@ -38,4 +35,12 @@ plt.loglog(deg, cnt, color='b')
 plt.title("Degree Histogram")
 plt.ylabel("Count")
 plt.xlabel("Degree")
+plt.show()
+
+# Run the system
+dc, perf_sum = s1.run()
+
+# Plot the results
+plt.plot(perf_sum)
+#plt.semilogy(perf_sum)
 plt.show()

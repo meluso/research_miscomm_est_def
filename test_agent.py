@@ -12,7 +12,7 @@ import model_agent as ag
 from numpy.random import random_sample as rand
 
 # Create an instance of an agent
-a1 = ag.Agent(2,[0,3],0.5,"rosenbrock")
+a1 = ag.Agent(2,[0,3],0.5,"styblinski-tang","best_est")
 print("Location = " + str(a1.location))
 print("Neighbors = " + str(a1.neighbors))
 print("Bound = " + str(a1.obj_bounds.xmax))

@@ -21,16 +21,17 @@ class System(object):
     are engineers designing various components. Also includes methods for
     advancing the system from an initial to a final converged design.'''
 
-    def __init__(self, m = 2, n = 1000, obj = "sphere", p = 0.5):
+    def __init__(self, n = 1000, obj = "sphere", p = 0.5, mthd = ""):
         '''Initializes an instance of the system model.'''
         
         ##### Agent Properties #####
         self.obj_fn = obj  # The objective function used by the agents
+        self.mthd = mthd  # Initialize the type of future estimates being made
         
         ##### Network Properties #####
         
         self.n = n  # The number of agents in the network
-        self.m = m  # The number of edges created with each new node
+        self.new_edges = 2  # The number of edges created with each new node
         self.p = p  # The probability of a new edge creating a triangle
         
         # Generate the network using generate_network
@@ -81,7 +82,7 @@ class System(object):
         distribution and creates an agent for each node.'''
         
         # Use networkx to create a network of the specified number of nodes
-        self.graph = gen(self.n,self.m,self.p)
+        self.graph = gen(self.n,self.new_edges,self.p)
         
         # Create an empty system
         system = []
@@ -94,7 +95,7 @@ class System(object):
             
             # Create agent in system with specified inputs for its neighbors,
             # probability of estimate type, and objective function
-            system.append(ag.Agent(i,nbrs,self.p,self.obj_fn))
+            system.append(ag.Agent(i,nbrs,self.p,self.obj_fn,self.mthd))
             
         # Return the generated network of agents
         return system
