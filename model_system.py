@@ -159,11 +159,11 @@ class System(object):
         
         # Create performance vector and sum
         perf_vect = [self.vect[i].fx for i in range(self.n)]
-        perf_sum = []
-        perf_sum.append(sum(perf_vect))
+        perf_sys = []
+        perf_sys.append(sum(perf_vect))
         
         # Perform design cycles until converged
-        while dc < 100 and cv == 0:
+        while (cv == 0) and (dc < 100):
             
             # Increment design cycle counter
             dc = dc + 1
@@ -173,22 +173,51 @@ class System(object):
             
             # Evaluate the system's performance
             perf_vect = [self.vect[i].fx for i in range(self.n)]
-            perf_sum.append(sum(perf_vect))
+            perf_sys.append(sum(perf_vect))
             
             # Check convergence conditions
             if dc > 3:
                 
                 # Check current evaluation against current-3
-                if abs(perf_sum[dc] - perf_sum[dc - 3]) < self.conv_lim:
-                    cv == 1 # Set the convergence flag to terminate
+                if abs(perf_sys[-1] - perf_sys[-1 - 3]) < self.conv_lim:
+                    cv = 1 # Set the convergence flag to terminate
                 
             else:
                 
                 # Check current evaluation against the original evaluation
-                if abs(perf_sum[dc] - perf_sum[0]) < self.conv_lim:
-                    cv == 1 # Set the convergence flag to terminate
+                if abs(perf_sys[-1] - perf_sys[0]) < self.conv_lim:
+                    cv = 1 # Set the convergence flag to terminate
+                    
             
-        return dc, perf_sum
-    
+            
+        # Collect all of the information from this system to return after the
+        # run of the simulation. It returns the following information: the
+        # number of design cycles required for convergence, the system
+        # performance at the end of the design cycles, the mean degree of the
+        # network, the final performance of each agent, and the degree of each
+        # agent.
+        
+        k_agents = [d for n, d in self.graph.degree()] # Get the agents' degrees
+        k_mean = np.mean(k_agents)
+        perf_ag = [[i.x,i.fx] for i in self.vect]
+        
+        # Build the results vector
+        results = Results(dc, perf_sys, k_mean, perf_ag, k_agents)
+        
+        # Return the results
+        return results
 
-            
+
+class Results(object):
+    '''An object which returns a specified set of properties from the system
+    after completion of a simulation run.'''
+    
+    def __init__(self, des_cyc, perf_system, k_mean, perf_agents, k_agents):
+        '''Creates an instances of the results object to return the outputs of
+        the simulation to the monte carlo.'''
+    
+        self.design_cycles = des_cyc
+        self.perf_system = perf_system
+        self.k_mean = k_mean
+        self.perf_agents = perf_agents
+        self.k_agents = k_agents

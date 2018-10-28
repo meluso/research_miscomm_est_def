@@ -1,50 +1,120 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct 25 15:53:55 2018
+
+@author: Juango the Blue
+"""
+
 import numpy as np
-from scipy.optimize import minimize
+from numpy import pi, cos, sqrt, exp, dot
+import scipy.optimize as opt
 
-def objective(x,y):
-    return x[0]*x[3]*(x[0]+x[1]+x[2])+x[2]*y[0]+y[1]
+###############################################################################
 
-def constraint1(x):
-    return x[0]*x[1]*x[2]*x[3]-25.0
+# List of objective functions available
+obj_fn = ["ackley","styblinski-tang","rosenbrock","sphere"]
+num_fn = len(obj_fn)
 
-def constraint2(x):
-    sum_eq = 40.0
-    for i in range(4):
-        sum_eq = sum_eq - x[i]**2
-    return sum_eq
+# Set fn bounds
+obj_bounds = [[-32.768,32.768],
+              [-5.00,10.00],
+              [-5.00,5.00],
+              [-5.12,5.12]]
 
-# initial guesses
-n = 4
-x0 = np.zeros(n)
-x0[0] = 1.0
-x0[1] = 5.0
-x0[2] = 5.0
-x0[3] = 1.0
+# Set the max degree
+k_max = 1000
 
-m = 2
-y0 = np.zeros(m)
-y0[0] = 0.0
-y0[1] = 1.0
+# Create extrema matrices
+min_by_degree = np.empty([num_fn,k_max])
+max_by_degree = np.empty([num_fn,k_max])
 
-# show initial objective
-print('Initial Objective: ' + str(objective(x0,y0)))
+# Optimize to find extrema
+for k in range(k_max):
+    for fn in obj_fn:
+        
+        # Optimize 
 
-# optimize
-b = (1.0,5.0)
-bnds = (b, b, b, b)
-con1 = {'type': 'ineq', 'fun': constraint1}
-con2 = {'type': 'eq', 'fun': constraint2}
-cons = ([con1,con2])
-solution = minimize(objective,x0,args=(y0),method='SLSQP',\
-                    bounds=bnds,constraints=cons)
-x = solution.x
 
-# show final objective
-print('Final Objective: ' + str(objective(x,y0)))
 
-# print solution
-print('Solution')
-print('x1 = ' + str(x[0]))
-print('x2 = ' + str(x[1]))
-print('x3 = ' + str(x[2]))
-print('x4 = ' + str(x[3]))
+
+###############################################################################
+
+def objective(fn,x):
+    '''Uses a function input and an x vector to evaluate the function.'''
+
+    # Calculate the node's degree from neighbor vector length
+    d = len(x)
+
+    # Select the correct function to evaluate
+    if fn == "ackley":
+
+        # Set values of constants for ackley function
+        a = 20
+        b = 0.2
+        c = 2*pi
+
+        # Build the sums for function evaluation
+        cos_sum = 0
+        for j in x:
+            cos_sum = cos_sum + cos(c*j)
+
+        # Return the function evaluation
+        result = -a*exp(-b*sqrt((dot(x,x))/d) - exp(cos_sum/d) + a + exp(1)
+    
+    elif fn == "styblinski-tang":
+        
+        # Build the sum for function evaluation
+        for j in x:
+            x_term = x_term + j**4 - 16*j**2 + 5*j
+            
+        # Return the outcome
+        result = 0.5*x_term
+        
+    elif fn == "rosenbrock":
+        
+        # Call scipy function for rosenbrock
+        result = opt.rosen(x)
+
+    else:
+
+        # Evaluate the sphere function
+        result = dot(x,x)
+
+    # Return the outcome
+    return result
+
+def optimize(self,xi,xj):
+    '''Optimizes the agent's design using the objective function and inputs
+    from neighbor agents. The function takes in the agent's own value (xi)
+    and the neighbors vector (xj). It selects the appropriate optimization
+    algorithm for the function.'''
+    
+    # Use basinhopping only for multiple-minimum functions
+    if self.fn == "ackley":
+
+        # Call the basin hopping minimization method
+        output = opt.basinhopping(func = self.objective,
+                         x0 = xi,,
+                         minimizer_kwargs = {"args": xj},
+                         accept_test = self.obj_bounds)
+        
+        # Save the desired outputs in float format
+        if isinstance(output.fun,np.ndarray):
+            result = Obj_Eval(output.x[0],output.fun[0])
+        else:
+            result = Obj_Eval(output.x[0],output.fun)
+        
+    else:  # Use gradient for single- or few-minimum functions
+        
+        # Call the bounded brent scalar minimization function
+        output = opt.minimize_scalar(fun = self.objective,
+                         bounds = (self.obj_bounds.xmin,\
+                                   self.obj_bounds.xmax),
+                         args = (xj),
+                         method = 'bounded')
+        
+        # Save the desired outputs
+        result = Obj_Eval(output.x,output.fun)
+    
+    # Return the result
+    return result

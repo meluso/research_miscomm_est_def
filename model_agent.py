@@ -167,6 +167,7 @@ class Agent(object):
         # median's value.
         self.median_index = np.argsort(self.hist_out)[len(self.hist_out)//2]
         self.hist_med.x = self.hist_in[self.median_index]
+        self.hist_med.fx = self.hist_out[self.median_index]
         
         # Initialize the agent's current estimate by randomly generating an
         # a value on the domain of the objective function inputs
@@ -264,11 +265,14 @@ class Agent(object):
                              x0 = xi,
                              stepsize = (self.obj_bounds.xmax \
                                          - self.obj_bounds.xmin)/10,
-                             minimizer_kwargs = {"args": xj,"method": "BFGS"},
+                             minimizer_kwargs = {"args": xj},
                              accept_test = self.obj_bounds)
             
-            # Save the desired outputs
-            result = Obj_Eval(output.x[0],output.fun)
+            # Save the desired outputs in float format
+            if isinstance(output.fun,np.ndarray):
+                result = Obj_Eval(output.x[0],output.fun[0])
+            else:
+                result = Obj_Eval(output.x[0],output.fun)
             
         else:  # Use gradient for single- or few-minimum functions
             
@@ -324,7 +328,7 @@ class Agent(object):
                 xj_term = xj_term + j**4 - 16*j**2 + 5*j
                 
             # Return the outcome
-            result = 0.5*(xi_term + xj_term)
+            result = 0.5*(xi_term + xj_term) + 39.166166*(k + 1)
             
         elif self.fn == "rosenbrock":
             

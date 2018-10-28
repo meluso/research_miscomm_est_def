@@ -38,9 +38,9 @@ plt.xlabel("Degree")
 plt.show()
 
 # Run the system
-dc, perf_sum = s1.run()
+results = s1.run()
 
 # Plot the results
-plt.plot(perf_sum)
-#plt.semilogy(perf_sum)
+plt.plot(results.perf_system)
+#plt.semilogy(perf_system)
 plt.show()
