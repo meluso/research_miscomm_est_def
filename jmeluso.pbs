@@ -1,0 +1,30 @@
+#!/bin/sh
+####  PBS preamble
+
+# Job Specifications
+#PBS -S /bin/sh
+#PBS -N jmeluso_mcsim
+
+# Log-in Specifications
+#PBS -M jmeluso@umich.edu
+#PBS -m abe
+
+# Processing Specifications:
+#PBS -l procs=20,mem=2gb,walltime=01:00:00
+#PBS -j oe
+#PBS -V
+
+# Flux Allocation Specifications
+#PBS -A engin_flux
+#PBS -q flux
+#PBS -l qos=flux
+
+####  End PBS preamble
+
+# Track execution outputs
+if [ "x${PBS_NODEFILE}" != "x" ] ; then
+   cat $PBS_NODEFILE   # contains a list of the CPUs you were using if run with PBS
+fi
+
+# Use python to run with 20 cores
+epd monte_carlo.py

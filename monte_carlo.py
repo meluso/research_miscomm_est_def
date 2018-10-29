@@ -66,17 +66,17 @@ if __name__ == '__main__':
     t_start = dt.datetime.now()
     
     # Number of trials to perform for each permutation of variables
-    num_trials = 1000
+    num_trials = 1
     
     # Number of agents in the model
     num_agents = 1000
     
     # A list of the different objective functions available to the agents.
     obj_fn = [
-            "sphere", 
+            #"sphere", 
             "ackley", 
-            "rosenbrock", 
-            "styblinski-tang"
+            #"rosenbrock", 
+            #"styblinski-tang"
             ]
     num_fn = len(obj_fn)
     
