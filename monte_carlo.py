@@ -69,7 +69,7 @@ if __name__ == '__main__':
     num_trials = 1
     
     # Number of agents in the model
-    num_agents = 1000
+    num_agents = 10
     
     # A list of the different objective functions available to the agents.
     obj_fn = [

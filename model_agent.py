@@ -90,7 +90,8 @@ class Agent(object):
 
         # Set decision variable boundaries
         if self.fn == "ackley":
-            self.obj_bounds = Bounds(-32.768,32.768)
+            #self.obj_bounds = Bounds(-32.768,32.768)
+            self.obj_bounds = Bounds(-5.00,5.00)
         elif self.fn == "rosenbrock":
             self.obj_bounds = Bounds(-5.00,10.00)
         elif self.fn == "styblinski-tang":
@@ -265,8 +266,17 @@ class Agent(object):
                              x0 = xi,
                              stepsize = (self.obj_bounds.xmax \
                                          - self.obj_bounds.xmin)/10,
-                             minimizer_kwargs = {"args": xj},
-                             accept_test = self.obj_bounds)
+                             minimizer_kwargs = {
+                                     "method": opt.minimize_scalar(
+                                             fun = self.objective,
+                                             bounds = (self.obj_bounds.xmin,\
+                                                       self.obj_bounds.xmax),
+                                             args = xj,
+                                             method = 'bounded',
+                                             ),
+                                     },
+                             accept_test = self.obj_bounds
+                             )
             
             # Save the desired outputs in float format
             if isinstance(output.fun,np.ndarray):
@@ -385,6 +395,6 @@ class Bounds(object):
         '''Checks to see if a value falls within the specified bounds or not
         and returns either True or False accordingly.'''
         x = kwargs["x_new"]
-        tmin = bool(np.all(x >= self.xmin))
-        tmax = bool(np.all(x <= self.xmax))
+        tmin = bool(x >= self.xmin)
+        tmax = bool(x <= self.xmax)
         return tmin and tmax

@@ -15,7 +15,7 @@ import matplotlib.pylab as plt
 import pyDOE as doe
 
 # Create an instance of an agent
-a1 = ag.Agent(2,[0,3],0.5,"ackley","best_est")
+a1 = ag.Agent(2,[0,3],0.5,"sphere","best_est")
 print("Location = " + str(a1.location))
 print("Neighbors = " + str(a1.neighbors))
 print("Bound = " + str(a1.obj_bounds.xmax))
