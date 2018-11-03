@@ -87,6 +87,9 @@ class Agent(object):
         ##### Objective Properties #####
 
         self.fn = obj  # Specify the evaluating objective function
+        
+        # Create the agent's objective
+        self.objective = Objective(self.fn,self.neighbors)
 
         # Set decision variable boundaries
         if self.fn == "ackley":
@@ -150,7 +153,7 @@ class Agent(object):
         xj = [sys_vect[j].x for j in self.neighbors]
         
         # Evaluate the given inputs
-        result = self.objective(xi,xj)
+        result = self.objective(xi, xj)
         
         # Save x and f(x) as an objective evaluation to the history list
         self.history.append(Obj_Eval(xi,result))
@@ -194,7 +197,7 @@ class Agent(object):
         xj = [sys_vect[j] for j in self.neighbors]
         
         # Calculate the current estimate's objective evaluation
-        self.curr_est.fx = self.objective(xi,xj)
+        self.curr_est.fx = self.objective(xi, xj)
 
 
     def get_estimate(self):
@@ -260,21 +263,19 @@ class Agent(object):
         
         # Use basinhopping only for multiple-minimum functions
         if self.fn == "ackley":
+            
+            # Define arguments for basin hopping minimization
+            args = {"method": "L-BFGS-B",
+                    "bounds": [(self.obj_bounds.xmin,self.obj_bounds.xmax)],
+                    "args": xj}
 
             # Call the basin hopping minimization method
             output = opt.basinhopping(func = self.objective,
                              x0 = xi,
+                             niter = 1,
                              stepsize = (self.obj_bounds.xmax \
                                          - self.obj_bounds.xmin)/10,
-                             minimizer_kwargs = {
-                                     "method": opt.minimize_scalar(
-                                             fun = self.objective,
-                                             bounds = (self.obj_bounds.xmin,\
-                                                       self.obj_bounds.xmax),
-                                             args = xj,
-                                             method = 'bounded',
-                                             ),
-                                     },
+                             minimizer_kwargs = args,
                              accept_test = self.obj_bounds
                              )
             
@@ -290,7 +291,7 @@ class Agent(object):
             output = opt.minimize_scalar(fun = self.objective,
                              bounds = (self.obj_bounds.xmin,\
                                        self.obj_bounds.xmax),
-                             args = (xj),
+                             args = xj,
                              method = 'bounded')
             
             # Save the desired outputs
@@ -300,14 +301,23 @@ class Agent(object):
         return result
 
 
-    def objective(self,xi,xj):
-        '''Based on the agent's own input (xi), a selected function (fn), and
-        the inputs of the other agents (a vector, xj, of length k), this method
-        calculates the specified objective function evaluation and returns the
-        solution. '''
+class Objective:
+    '''Based on the agent's own input (xi), a selected function (fn), and
+    the inputs of the other agents (a vector, xj, of length k), this callable
+    class calculates the specified objective function evaluation and returns
+    the solution. '''
+    
+    def __init__(self,fn,neighbors):
+        '''Initializes the objective function with the specified input function
+        given by (fn) and calculates its degree (k) from its neighbors.'''
+        
+        self.fn = fn  # The selected objective function
+        self.k = len(neighbors)  # The agent's degree
+        
 
-        # Calculate the node's degree from neighbor vector length
-        k = len(xj)
+    def __call__(self,xi,xj):
+        '''Executes the specified objective function with the inputs (xi) for
+        the current agent and (xj) for the adjacent agents.'''        
 
         # Select the correct function to evaluate
         if self.fn == "ackley":
@@ -323,8 +333,8 @@ class Agent(object):
                 cos_sum = cos_sum + cos(c*j)
 
             # Evaluate the ackley function
-            root_term = -a*exp(-b*sqrt((xi**2 + dot(xj,xj))/(k + 1)))
-            cos_term = -exp((cos(c*xi) + cos_sum)/(k + 1))
+            root_term = -a*exp(-b*sqrt((xi**2 + dot(xj,xj))/(self.k + 1)))
+            cos_term = -exp((cos(c*xi) + cos_sum)/(self.k + 1))
 
             # Return the function evaluation
             result = root_term + cos_term + a + exp(1)
@@ -338,7 +348,7 @@ class Agent(object):
                 xj_term = xj_term + j**4 - 16*j**2 + 5*j
                 
             # Return the outcome
-            result = 0.5*(xi_term + xj_term) + 39.166166*(k + 1)
+            result = 0.5*(xi_term + xj_term) + 39.166166*(self.k + 1)
             
         elif self.fn == "rosenbrock":
             
@@ -388,13 +398,13 @@ class Bounds(object):
     
     def __init__(self,xmin,xmax):
         '''Initializes the bounds class with min and max values.'''
-        self.xmin = xmin
-        self.xmax = xmax
-    
+        self.xmax = np.array(xmax)
+        self.xmin = np.array(xmin)
+        
     def __call__(self, **kwargs):
         '''Checks to see if a value falls within the specified bounds or not
         and returns either True or False accordingly.'''
         x = kwargs["x_new"]
-        tmin = bool(x >= self.xmin)
-        tmax = bool(x <= self.xmax)
+        tmax = bool(np.all(x <= self.xmax))
+        tmin = bool(np.all(x >= self.xmin))
         return tmin and tmax

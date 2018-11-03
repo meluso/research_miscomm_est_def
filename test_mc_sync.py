@@ -66,7 +66,7 @@ if __name__ == '__main__':
     t_start = dt.datetime.now()
     
     # Number of trials to perform for each permutation of variables
-    num_trials = 100
+    num_trials = 1
     
     # Number of agents in the model
     num_agents = 1000
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     
     # Run simulation through pool of workers with sim_inputs
     for i in range(len(sim_inputs)):
-        sim_outputs[i] = pool.apply_async(execute_trial, args=(sim_inputs[i],)).get()
+        sim_outputs[i] = pool.apply(execute_trial, args=(sim_inputs[i],))
 
 
 ###############################################################################

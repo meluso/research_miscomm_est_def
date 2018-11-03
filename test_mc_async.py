@@ -66,7 +66,7 @@ if __name__ == '__main__':
     t_start = dt.datetime.now()
     
     # Number of trials to perform for each permutation of variables
-    num_trials = 100
+    num_trials = 1
     
     # Number of agents in the model
     num_agents = 1000

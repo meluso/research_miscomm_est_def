@@ -2,7 +2,6 @@
 ####  PBS preamble
 
 # Job Specifications
-#PBS -S /bin/sh
 #PBS -N jmeluso_mcsim
 
 # Log-in Specifications
@@ -10,7 +9,7 @@
 #PBS -m abe
 
 # Processing Specifications:
-#PBS -l procs=20,mem=2gb,walltime=01:00:00
+#PBS -l procs=20,pmem=2gb,walltime=01:00:00
 #PBS -j oe
 #PBS -V
 

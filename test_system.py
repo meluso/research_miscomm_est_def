@@ -12,10 +12,13 @@ import model_system as sy
 import matplotlib.pyplot as plt
 import networkx as nx
 import collections
+import datetime as dt
+
+# Start timer
+t_start = dt.datetime.now()
 
 # Generate a system
-s1 = sy.System(100,"styblinski-tang",0.5,"best_est")
-
+s1 = sy.System(1000,"ackley",0.5,"best_est")
 
 # Plot the system
 options = {
@@ -44,3 +47,7 @@ results = s1.run()
 plt.plot(results.perf_system)
 #plt.semilogy(perf_system)
 plt.show()
+
+# Stop timer
+t_stop = dt.datetime.now()
+print(t_stop - t_start)
