@@ -2,7 +2,7 @@
 """
 @author: John Meluso
 @date: 2018-10-10
-@name: monte_carlo.py
+@name: monte_carlo_v01.py
 
 Performs a Monte Carlo simulation on a network of engineer agents. This
 model initializes and runs an instance of the system model, and sweeps the

@@ -10,9 +10,8 @@ This file tests the agent class.
 
 import model_agent as ag
 from numpy.random import random_sample as rand
-import numpy as np
 import matplotlib.pylab as plt
-import pyDOE as doe
+import doe_lhs as doe
 
 # Create an instance of an agent
 a1 = ag.Agent(2,[0,3],0.5,"ackley","best_est")

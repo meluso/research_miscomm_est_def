@@ -2,14 +2,14 @@
 ####  PBS preamble
 
 # Job Specifications
-#PBS -N jmeluso_mcsim
+#PBS -N jam_mcasync
 
 # Log-in Specifications
 #PBS -M jmeluso@umich.edu
 #PBS -m abe
 
 # Processing Specifications:
-#PBS -l procs=20,pmem=2gb,walltime=01:00:00
+#PBS -l nodes=1:ppn=4,walltime=03:00:00
 #PBS -j oe
 #PBS -V
 
@@ -25,5 +25,8 @@ if [ "x${PBS_NODEFILE}" != "x" ] ; then
    cat $PBS_NODEFILE   # contains a list of the CPUs you were using if run with PBS
 fi
 
+# Change to the scripts directory
+cd /home/jmeluso/research_miscomm_est_def/scripts
+
 # Use python to run with 20 cores
-epd monte_carlo.py
+python test_mc_async.py

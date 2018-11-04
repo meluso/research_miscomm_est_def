@@ -14,7 +14,7 @@ history of each agent in the network, and the process of designing the system.
 from networkx.generators.random_graphs import powerlaw_cluster_graph as gen
 import numpy as np
 import model_agent as ag
-import pyDOE as doe
+import doe_lhs as doe
 
 class System(object):
     '''Defines a class system which contains a specified number of agents that
