@@ -18,7 +18,7 @@ import datetime as dt
 import csv
 
 ###############################################################################
-# Execution Function
+# Execution & Logging Functions
 ###############################################################################                
 
 def execute_trial(x):
@@ -68,10 +68,10 @@ if __name__ == '__main__':
     t_start = dt.datetime.now()
     
     # Number of trials to perform for each permutation of variables
-    num_trials = 100
+    num_trials = 1
     
     # Number of agents in the model
-    num_agents = 1000
+    num_agents = 10
     
     # A list of the different objective functions available to the agents.
     obj_fn = [
@@ -100,6 +100,7 @@ if __name__ == '__main__':
     results_summary = []
     results_system = []
     results_agents = []
+    sim_outputs = []
 
 
 ###############################################################################
