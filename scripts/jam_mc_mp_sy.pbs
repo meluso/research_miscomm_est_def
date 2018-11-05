@@ -2,14 +2,14 @@
 ####  PBS preamble
 
 # Job Specifications
-#PBS -N jam_mc_v01
+#PBS -N jam_mc_mp_sy
 
 # Log-in Specifications
 #PBS -M jmeluso@umich.edu
 #PBS -m abe
 
 # Processing Specifications:
-#PBS -l nodes=1:ppn=12,mem=47gb,walltime=48:00:00
+#PBS -l nodes=1:ppn=4,pmem=4000mb,walltime=02:00:00
 #PBS -j oe
 #PBS -V
 
@@ -29,4 +29,4 @@ fi
 cd /home/jmeluso/research_miscomm_est_def/scripts
 
 # Use python to run with 20 cores
-python monte_carlo.py
+python test_mc_mp_sync.py
