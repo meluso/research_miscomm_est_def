@@ -125,7 +125,8 @@ if __name__ == '__main__':
                             est_meth[mt]])
     
     # Run simulation through pool of workers with sim_inputs
-    sim_outputs = pool.map_async(execute_trial,sim_inputs)
+    result = pool.map_async(execute_trial,sim_inputs)
+    sim_outputs = result.get()
     pool.close()
     pool.join()
 

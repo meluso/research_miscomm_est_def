@@ -9,7 +9,7 @@
 #PBS -m abe
 
 # Processing Specifications:
-#PBS -l nodes=1:ppn=12,mem=47gb,walltime=03:00:00
+#PBS -l nodes=1:ppn=12,mem=47gb,walltime=48:00:00
 #PBS -j oe
 #PBS -V
 
