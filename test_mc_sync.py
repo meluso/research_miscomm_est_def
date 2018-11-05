@@ -55,7 +55,7 @@ def execute_trial(x):
     # Return results
     return [results_summary, results_system, results_agents]
 
-
+    
 ###############################################################################
 # Initialize simulation parameters
 ###############################################################################
@@ -98,7 +98,8 @@ if __name__ == '__main__':
     results_summary = []
     results_system = []
     results_agents = []
-    pool = mp.Pool()
+    cpus = mp.cpu_count() - 1
+    pool = mp.Pool(processes=cpus)
 
 ###############################################################################
 # Run Simulation
@@ -123,12 +124,10 @@ if __name__ == '__main__':
                             est_prob[pr],
                             est_meth[mt]])
     
-    # Initialize simulation outputs
-    sim_outputs = len(sim_inputs)*[None]
-    
     # Run simulation through pool of workers with sim_inputs
-    for i in range(len(sim_inputs)):
-        sim_outputs[i] = pool.apply(execute_trial, args=(sim_inputs[i],))
+    sim_outputs = pool.map(execute_trial,sim_inputs)
+    pool.close()
+    pool.join()
 
 
 ###############################################################################

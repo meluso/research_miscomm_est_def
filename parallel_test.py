@@ -1,26 +1,29 @@
-from multiprocessing import Pool
-import time
+import urllib2 
+from multiprocessing.dummy import Pool as ThreadPool 
 
-def square(x):  
-    # calculate the square of the value of x
-    return x*x
+urls = [
+  'http://www.python.org', 
+  'http://www.python.org/about/',
+  'http://www.onlamp.com/pub/a/python/2003/04/17/metaclasses.html',
+  'http://www.python.org/doc/',
+  'http://www.python.org/download/',
+  'http://www.python.org/getit/',
+  'http://www.python.org/community/',
+  'https://wiki.python.org/moin/',
+  'http://planet.python.org/',
+  'https://wiki.python.org/moin/LocalUserGroups',
+  'http://www.python.org/psf/',
+  'http://docs.python.org/devguide/',
+  'http://www.python.org/community/awards/'
+  # etc.. 
+  ]
 
-if __name__ == '__main__':
-    
-    t_start = time.clock()
-    
-    # Define the dataset
-    dataset = range(10000000)
-
-    # Output the dataset
-   # print ('Dataset: ' + str(dataset))
-
-    # Run this with a pool of 5 agents having a chunksize of 3 until finished
-    agents = 2
-    pool = Pool(processes=agents)
-    result = pool.map(square, dataset)
-
-    # Output the result
-   # print ('Result:  ' + str(result))
-    
-    print(time.clock() - t_start)
+# Make the Pool of workers
+pool = ThreadPool(4) 
+# Open the urls in their own threads
+# and return the results
+results = pool.map(urllib2.urlopen, urls)
+#close the pool and wait for the work to finish 
+pool.close() 
+pool.join()
+print(results)
