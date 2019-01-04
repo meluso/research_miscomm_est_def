@@ -18,7 +18,7 @@ import datetime as dt
 t_start = dt.datetime.now()
 
 # Generate a system
-s1 = sy.System(1000,"ackley",0.5,"best_est")
+s1 = sy.System(100,"ackley",1,"future_always")
 
 # Plot the system
 options = {
@@ -36,16 +36,17 @@ degree_count = collections.Counter(degree_sequence)
 deg, cnt = zip(*degree_count.items())
 plt.loglog(deg, cnt, color='b')
 plt.title("Degree Histogram")
-plt.ylabel("Count")
-plt.xlabel("Degree")
+plt.ylabel("Frequency")
+plt.xlabel("Artifact Degree")
 plt.show()
+plt.savefig("degree_distribution.svg")
 
 # Run the system
 results = s1.run()
 
 # Plot the results
 plt.plot(results.perf_system)
-#plt.semilogy(perf_system)
+#plt.semilogy(results.perf_system)
 plt.show()
 
 # Stop timer
