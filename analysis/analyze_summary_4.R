@@ -26,6 +26,9 @@
     rosen = results[results$fn == "rosenbrock",c(1:2,4:7)]
     stybtang = results[results$fn == "styblinski-tang",c(1:2,4:7)]
     
+    # Extra slice of ackley
+    ackley.future = ackley[ackley$probability == 1,]
+    
     # Copy over column names
     names(sphere)[1:6] = names(results)[c(1:2,4:7)]
     names(ackley)[1:6] = names(results)[c(1:2,4:7)]
@@ -96,4 +99,19 @@
     s <- seq(0,1,length=100)
     lines(10*s+1,predict(fit.future,list(probability=s)),lty=1,col=2)
     summary(fit.future)
+    
+# Examine future causes --------------------------------------------------------
+    
+    # Create scatterplot of performance vs cycles
+    plot(ackley.future$cycles,ackley.future$performance)
+    
+    # Plots means of performance vs cycles
+    plotmeans(performance ~ cycles,
+              data=ackley.future,
+              xlab="Number of Cycles",
+              ylab="System Performance",
+              n.label = FALSE)
+    
+    corfut = cor(ackley.future$cycles,ackley.future$performance)
+    cor.test(ackley.future$cycles,ackley.future$performance,method="pearson",alternative="greater")    
     
