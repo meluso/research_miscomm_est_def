@@ -68,10 +68,10 @@ if __name__ == '__main__':
     t_start = dt.datetime.now()
     
     # Number of trials to perform for each permutation of variables
-    num_trials = 1
+    num_trials = 200
     
     # Number of agents in the model
-    num_agents = 10
+    num_agents = 1000
     
     # A list of the different objective functions available to the agents.
     obj_fn = [
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     num_prob = len(est_prob)
     
     # A list of the different estimation methods used for historical data
-    est_meth = ["future_est", "best_est"]
+    est_meth = ["best_est"]
     num_meth = len(est_meth)
 
 
@@ -153,22 +153,19 @@ if __name__ == '__main__':
         replace(":","-").replace(".","_")
     
     # Construct a file for the summary
-    with open("../results/"+filename+"MCResultsSummary.csv","wb") as csv_file:
-        writer = csv.writer(csv_file, delimiter=',')
-        for line in results_summary:
-            writer.writerow(line)
+    with open("../results/"+filename+"MCResultsSummary.csv","w",newline='') as csv_file:
+        writer = csv.writer(csv_file, dialect='excel', delimiter=',')
+        writer.writerows(results_summary)
             
     # Construct a file for the system results
-    with open("../results/"+filename+"MCResultsSystem.csv","wb") as csv_file:
-        writer = csv.writer(csv_file, delimiter=',')
-        for line in results_system:
-            writer.writerow(line)
+    with open("../results/"+filename+"MCResultsSystem.csv","w",newline='') as csv_file:
+        writer = csv.writer(csv_file, dialect='excel', delimiter=',')
+        writer.writerows(results_system)
             
     # Construct a file for the 
-    with open("../results/"+filename+"MCResultsAgents.csv","wb") as csv_file:
-        writer = csv.writer(csv_file, delimiter=',')
-        for line in results_agents:
-            writer.writerow(line)
+    with open("../results/"+filename+"MCResultsAgents.csv","w",newline='') as csv_file:
+        writer = csv.writer(csv_file, dialect='excel', delimiter=',')
+        writer.writerow(results_agents)
 
     # Stop timer
     t_stop = dt.datetime.now()

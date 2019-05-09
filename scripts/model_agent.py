@@ -63,6 +63,7 @@ Date:       Author:    Description:
 2018-10-21  jmeluso    Initial version completed. Updates ongoing to tune the
                        model to perform in a way which produces meaningful
                        results.
+2019-03-28  rojanov    Updated code for python3. 
 -------------------------------------------------------------------------------
 """
 
@@ -163,7 +164,7 @@ class Agent(object):
         '''Uses the history generated so far to set the historical median and
         generates a random value for the initial current estimate.'''
         
-        # Find the median historical value
+        # Extract the input and output values from the agent's history.
         self.hist_in = [h.x for h in self.history]
         self.hist_out = [h.fx for h in self.history]
         

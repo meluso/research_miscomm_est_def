@@ -17,7 +17,7 @@ import datetime as dt
 t_start = dt.datetime.now()
 
 # Generate a system with n nodes
-n = 1000
+n = 100
 s1 = sy.System(n,"sphere",0.9,"current_always")
 
 # Plot the system
@@ -26,6 +26,11 @@ options = {
         'node_size': 15,
         'width': 1
         }
+
+# Create new figure for network graph
+fig_network = plt.figure()
+
+# Build network graph in figure
 nx.draw_kamada_kawai(s1.graph, **options)
 plt.savefig("network_graph.tif", format='tif', dpi=250)
 plt.savefig("network_graph.eps", format='eps', dpi=250)
@@ -39,6 +44,9 @@ hist = [float(x)/n for x in nx.degree_histogram(s1.graph)]
 #plt.show()
 
 # Create a logarithmic plot of the degree distribution
+fig_log = plt.figure()
+
+# Build logarithmic plot of the degree distribution
 plt.loglog(hist, color='b',marker=".",ls="none")
 plt.ylabel("Fraction of Nodes")
 plt.xlabel("Artifact Degree")
@@ -51,7 +59,10 @@ plt.show()
 # Run the system
 results = s1.run()
 
-# Plot the results
+# Create figure for system performance
+fig_system = plt.figure()
+
+# Plot the system performance
 plt.plot(results.perf_system)
 plt.xlabel("Design Cycle")
 plt.ylabel("System Performance")
