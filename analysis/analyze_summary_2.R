@@ -11,7 +11,7 @@
     library(gplots)
     
     # Import data
-    results <- read.csv("~/2016-Present (Michigan)/Research/12 Estimation Definitions/04 Analysis/Results/2018-11-10_08-13-06_MCResultsSummary.csv", header=FALSE)
+    results <- read.csv("~/2016-Present (Michigan)/Research/12 Estimation Definitions/04 Analysis/Results/2019-05-08_22-32-25_MCResultsSummary.csv", header=FALSE)
     names(results)[1:7] <- c('index','method','fn','probability','cycles','performance','degree')
     
     # Create vectors of variables
