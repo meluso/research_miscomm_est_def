@@ -179,3 +179,44 @@
     TukeyHSD(stybtang.aov.perf)
     TukeyHSD(stybtang.aov.cyc)
     
+# Distribution fit -------------------------------------------------------------
+    
+    # Ackley & Rosenbrock Mean Disproval
+    shapiro.test(rosen.current$cycles)
+    shapiro.test(rosen.current$performance)
+    shapiro.test(rosen.future$cycles)
+    shapiro.test(rosen.future$performance)
+    shapiro.test(ackley.current$cycles)
+    shapiro.test(ackley.current$performance)
+    shapiro.test(ackley.future$cycles)
+    shapiro.test(ackley.future$performance)
+    
+    # Wilcoxon-Mann-Whitney Test of Rosenbrock Cycles
+    wilcox.test(rosen.current$cycles,
+                rosen.future$cycles,
+                alternative = "two.sided",
+                conf.int = TRUE,
+                conf.level = 0.95)
+    
+    # Wilcoxon-Mann-Whitney Test of Rosenbrock Performance
+    wilcox.test(rosen.current$performance,
+                rosen.future$performance,
+                alternative = "greater",
+                conf.int = TRUE,
+                conf.level = 0.95)
+    
+    # Wilcoxon-Mann-Whitney Test of Ackley Cycles
+    wilcox.test(ackley.current$cycles,
+                ackley.future$cycles,
+                alternative = "two.sided",
+                conf.int = TRUE,
+                conf.level = 0.95)
+    
+    # Wilcoxon-Mann-Whitney Test of Ackley Performance
+    wilcox.test(ackley.current$performance,
+                ackley.future$performance,
+                alternative = "less",
+                conf.int = TRUE,
+                conf.level = 0.95)
+    
+    

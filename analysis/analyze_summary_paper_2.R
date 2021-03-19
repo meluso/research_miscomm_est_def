@@ -12,7 +12,7 @@
     library(ggpubr)
     
     # Import data
-    results <- read.csv("~/2016-Present (Michigan)/Research/12 Estimation Definitions/04 Analysis/Results/2019-05-08_22-32-25_MCResultsSummary.csv", header=FALSE)
+    results <- read.csv("~/2016-2020 (Michigan)/Research/12 Estimation Definitions/04 Analysis/Results/2019-05-08_22-32-25_MCResultsSummary.csv", header=FALSE)
     names(results)[1:7] <- c('index','method','fn','probability','cycles','performance','degree')
     
     # Create vectors of variables
@@ -52,27 +52,27 @@
     names(stybtang.future)[5] = "method"
     
     # Combine the data by method
-    sphere.methods = rbind(sphere.current,sphere.future)
-    ackley.methods = rbind(ackley.current,ackley.future)
-    rosen.methods = rbind(rosen.current,rosen.future)
-    stybtang.methods = rbind(stybtang.current,stybtang.future)
+    sphere.methods = rbind(sphere.current,sphere.future)[2:5]
+    ackley.methods = rbind(ackley.current,ackley.future)[2:5]
+    rosen.methods = rbind(rosen.current,rosen.future)[2:5]
+    stybtang.methods = rbind(stybtang.current,stybtang.future)[2:5]
 
 # Plot by Methods --------------------------------------------------------------
-
+    
     # Ackley function
-    par(mar=c(4,4,2,2)+0.1)
-    plotmeans(performance ~ method,
-              xlab="Estimate Definition",
-              ylab="Mean Converged Objective Value",
-              n.label = FALSE,
-              data = ackley.methods)
+    #par(mar=c(4,4,2,2)+0.1)
+    ggline(ackley.methods, x = "method", y = "performance",
+           add = "mean_ci",
+           xlab = "Estimate Definition",
+           ylab = "Converged Performance Value"
+    )
     
     # Rosenbrock function
-    plotmeans(cycles ~ method,
-              xlab="Estimate Definition",
-              ylab="Mean Convergence Cycles",
-              n.label=FALSE,
-              data = rosen.methods)
+    ggline(rosen.methods, x = "method", y = "cycles",
+           add = "mean_ci",
+           xlab = "Estimate Definition",
+           ylab = "Converged Performance Value"
+    )
 
 # Re-Organize Data -------------------------------------------------------------
     
@@ -96,12 +96,12 @@
     # Scatterplot
     plot(ackley$probability,ackley$performance,
          xlab = "Probability",
-         ylab = "System Performance")
+         ylab = "System Performance",
+         yscale = "log10")
     
     # Mean plot
     plotmeans(performance ~ probability,
               data=ackley,
               xlab="Probability",
-              ylab="System Performance Degradation",
-              n.label = FALSE,
-              barcol = "#00274C")
+              ylab="System Performance",
+              n.label = FALSE)

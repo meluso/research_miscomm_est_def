@@ -43,7 +43,8 @@
               main="Sphere Mean Performance by Estimate Definition Probability",
               xlab="Probability",
               ylab="System Performance",
-              n.label = FALSE)
+              n.label = FALSE,
+              barcol = "#00274C")
     
     # Ackley
     plotmeans(performance ~ probability,
@@ -51,7 +52,8 @@
               main="Ackley Mean Performance by Estimate Definition Probability",
               xlab="Probability",
               ylab="System Performance",
-              n.label = FALSE)
+              n.label = FALSE,
+              barcol = "#00274C")
     
     # Rosenbrock
     plotmeans(performance ~ probability,
@@ -59,7 +61,8 @@
               main="Rosenbrock Mean Performance by Estimate Definition Probability",
               xlab="Probability",
               ylab="System Performance",
-              n.label = FALSE)
+              n.label = FALSE,
+              barcol = "#00274C")
     
     # Styblinski-Tang
     plotmeans(performance ~ probability,
@@ -67,7 +70,8 @@
               main="Styblinski-Tang Mean Performance by Estimate Definition Probability",
               xlab="Probability",
               ylab="System Performance",
-              n.label = FALSE)
+              n.label = FALSE,
+              barcol = "#00274C")
     
 # Fit distributions ------------------------------------------------------------
     
